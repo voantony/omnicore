@@ -85,7 +85,10 @@ bool fAddressIndex = false;
 //! Global lock for state objects
 RecursiveMutex cs_tally;
 
-CFeeRate minRelayTxFee{DUST_RELAY_TX_FEE};
+//! Fee rate for Omni reference outputs (dust). Follows -minrelaytxfee (see node/mempool_args.cpp),
+//! like the global minRelayTxFee did before the Bitcoin Core 24 rebase. Do not use DUST_RELAY_TX_FEE here:
+//! OmniGetDustThreshold() already multiplies by 3, which would make reference outputs 3x too large.
+CFeeRate minRelayTxFee{DEFAULT_MIN_RELAY_TX_FEE};
 
 //! Exodus address (changes based on network)
 static std::string exodus_address = "1EXoDusjGwvnjZUyKkxZ4UHEf77z6A5S4P";
