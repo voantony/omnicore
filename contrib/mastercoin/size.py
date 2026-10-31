@@ -49,7 +49,7 @@ MARKER = 4
 # This repository: src/script/standard.h MAX_OP_RETURN_RELAY.
 # IsStandard rejects a null-data script larger than this (policy.cpp).
 MAX_OP_RETURN_RELAY = 83
-RATES = (2, 10, 50)
+RATES = (2, 10, 20, 50)
 
 
 def push_header_len(n):
@@ -183,6 +183,11 @@ def check():
     # 8+1+1+1+76 = 87; the serialized output is 88.
     assert opreturn_out_size(76) == 88
     assert tapret_anchor_vb() == vsize(["P2TR"], [43, 43])
+    # Shielded Bitcoin appendix A (24 Sep 2026): 610-byte 2-in-2-out envelope
+    # pushes to a 625-byte OP_RETURN output. Their Table 4 prepay row is 154 vB,
+    # the same shape as tapret_anchor_vb().
+    assert opreturn_out_size(610) == 625
+    assert tapret_anchor_vb() == 154
 
 
 def print_table(title, rows):
@@ -345,6 +350,63 @@ def main():
         "%s %d" % (t, vsize([t], [OUT[t], OUT[t]])) for t in
         ("P2PKH", "P2SH-P2WPKH", "P2WPKH", "P2TR")
     ))
+    print()
+    print("Layer-note inputs (2 and 20 sat/vB)")
+    print()
+    print("Shared-anchor rows divide one %d vB tapret transaction by 100." % tapret)
+    print("That 100 is an assumption, so those per-transfer fees are estimates.")
+    print("The 154 vB and the carrier vB below are this script's serialization.")
+    env_out = opreturn_out_size(610)
+    carrier = vsize(["P2TR"], [env_out, OUT["P2TR"]])
+    # Table 4 of the paper. Reveal and the two-tx total are cited, not recomputed.
+    paper_reveal = 284
+    paper_witness_total = 438
+    assert tapret + paper_reveal == paper_witness_total
+    print("Shielded Bitcoin (Shikhelman, Komarov, Moskvin, 24 Sep 2026), Appendix A:")
+    print("cited 610-byte envelope, cited 625-byte OP_RETURN output (script also gets %d)." % env_out)
+    print("Carrier modeled here: one P2TR input, that output, one P2TR change = %d vB." % carrier)
+    print("Paper Table 4 witness alternative: prepay %d vB (matches tapret) + reveal %d vB = %d vB." % (
+        tapret, paper_reveal, paper_witness_total))
+    print("The reveal transaction is their figure. This script does not rebuild the tapscript.")
+    print("A federated pool that does not publish each transfer has no per-transfer")
+    print("Bitcoin transaction. 0 vB is that assumption, not a measurement.")
+    print()
+    print("| Item | vB | 2 sat/vB | 20 sat/vB | How the number was got |")
+    print("| --- | ---: | ---: | ---: | --- |")
+
+    def layer_row(label, vb, how, transfers=1):
+        per = vb / transfers
+        print("| %s | %s | %s | %s | %s |" % (
+            label,
+            fmt_sats(per) if transfers != 1 else str(vb),
+            fmt_sats(fee_sats(vb, 2) / transfers),
+            fmt_sats(fee_sats(vb, 20) / transfers),
+            how,
+        ))
+
+    layer_row("Tapret anchor, whole tx", tapret, "script serialization")
+    layer_row(
+        "ESTIMATE tapret / 100 transfers",
+        tapret,
+        "script vB, split by assumed 100",
+        100,
+    )
+    layer_row(
+        "Shielded Bitcoin OP_RETURN carrier tx",
+        carrier,
+        "script, using the paper's 610-byte envelope",
+    )
+    layer_row(
+        "Shielded Bitcoin witness pair (cited)",
+        paper_witness_total,
+        "paper Table 4, 154+284; 154 matches this script",
+    )
+    layer_row(
+        "ESTIMATE federated pool, in-pool transfer",
+        0,
+        "assumption: no Bitcoin tx per transfer",
+    )
+    layer_row("P2WPKH Omni simple-send peg", peg, "script serialization")
 
 
 if __name__ == "__main__":

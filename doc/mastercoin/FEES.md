@@ -27,11 +27,11 @@ Splits are accounting, not a second miner fee. Estimates are marked.
 
 Today: Omni Class C simple send (one recipient)
 
-| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 50 sat/vB tx (split) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Simple send P2PKH | 257 | 257 | 514 | 2570 | 12850 |
-| Simple send P2SH-P2PKH | 279 | 279 | 558 | 2790 | 13950 |
-| Simple send P2SH-P2WPKH | 197 | 197 | 394 | 1970 | 9850 |
+| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 20 sat/vB tx (split) | 50 sat/vB tx (split) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Simple send P2PKH | 257 | 257 | 514 | 2570 | 5140 | 12850 |
+| Simple send P2SH-P2PKH | 279 | 279 | 558 | 2790 | 5580 | 13950 |
+| Simple send P2SH-P2WPKH | 197 | 197 | 394 | 1970 | 3940 | 9850 |
 
 - Simple send P2PKH: Legacy 1… input. Allowed on mainnet today.
 - Simple send P2SH-P2PKH: P2SH wrapping a P2PKH redeem script (not wrapped SegWit). Output is a 3… script.
@@ -39,27 +39,27 @@ Today: Omni Class C simple send (one recipient)
 
 With SegWit and Taproot: same simple send, one input
 
-| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 50 sat/vB tx (split) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Simple send P2WPKH | 172 | 172 | 344 | 1720 | 8600 |
-| Simple send P2TR | 185 | 185 | 370 | 1850 | 9250 |
+| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 20 sat/vB tx (split) | 50 sat/vB tx (split) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Simple send P2WPKH | 172 | 172 | 344 | 1720 | 3440 | 8600 |
+| Simple send P2TR | 185 | 185 | 370 | 1850 | 3700 | 9250 |
 
 - Simple send P2WPKH: Native SegWit. develop mainnet WITNESS_V0_BLOCK = 999999, so this input is not accepted on mainnet yet.
 - Simple send P2TR: Taproot key-path spend. develop mainnet WITNESS_V1_BLOCK = 999999, so this input is not accepted on mainnet yet.
 
 Send-to-many (type 7): one Class C transaction, N recipient outputs + change
 
-| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 50 sat/vB tx (split) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Send-to-many P2PKH N=7 | 518 | 74 | 1036 (148) | 5180 (740) | 25900 (3700) |
-| Send-to-many P2PKH N=10 | 647 | 64.7 | 1294 (129.4) | 6470 (647) | 32350 (3235) |
-| Send-to-many P2PKH N=50 | 2370 | 47.4 | 4740 (94.8) | 23700 (474) | 118500 (2370) |
-| Send-to-many P2SH-P2WPKH N=7 | 446 | 63.7143 | 892 (127.4286) | 4460 (637.1429) | 22300 (3185.7143) |
-| Send-to-many P2SH-P2WPKH N=10 | 569 | 56.9 | 1138 (113.8) | 5690 (569) | 28450 (2845) |
-| Send-to-many P2SH-P2WPKH N=50 | 2212 | 44.24 | 4424 (88.48) | 22120 (442.4) | 110600 (2212) |
-| Send-to-many P2WPKH N=7 | 415 | 59.2857 | 830 (118.5714) | 4150 (592.8571) | 20750 (2964.2857) |
-| Send-to-many P2WPKH N=10 | 535 | 53.5 | 1070 (107) | 5350 (535) | 26750 (2675) |
-| Send-to-many P2WPKH N=50 | 2138 | 42.76 | 4276 (85.52) | 21380 (427.6) | 106900 (2138) |
+| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 20 sat/vB tx (split) | 50 sat/vB tx (split) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Send-to-many P2PKH N=7 | 518 | 74 | 1036 (148) | 5180 (740) | 10360 (1480) | 25900 (3700) |
+| Send-to-many P2PKH N=10 | 647 | 64.7 | 1294 (129.4) | 6470 (647) | 12940 (1294) | 32350 (3235) |
+| Send-to-many P2PKH N=50 | 2370 | 47.4 | 4740 (94.8) | 23700 (474) | 47400 (948) | 118500 (2370) |
+| Send-to-many P2SH-P2WPKH N=7 | 446 | 63.7143 | 892 (127.4286) | 4460 (637.1429) | 8920 (1274.2857) | 22300 (3185.7143) |
+| Send-to-many P2SH-P2WPKH N=10 | 569 | 56.9 | 1138 (113.8) | 5690 (569) | 11380 (1138) | 28450 (2845) |
+| Send-to-many P2SH-P2WPKH N=50 | 2212 | 44.24 | 4424 (88.48) | 22120 (442.4) | 44240 (884.8) | 110600 (2212) |
+| Send-to-many P2WPKH N=7 | 415 | 59.2857 | 830 (118.5714) | 4150 (592.8571) | 8300 (1185.7143) | 20750 (2964.2857) |
+| Send-to-many P2WPKH N=10 | 535 | 53.5 | 1070 (107) | 5350 (535) | 10700 (1070) | 26750 (2675) |
+| Send-to-many P2WPKH N=50 | 2138 | 42.76 | 4276 (85.52) | 21380 (427.6) | 42760 (855.2) | 106900 (2138) |
 
 - Send-to-many P2PKH N=7: Class C script is 79 bytes (data 76), within this repo's MAX_OP_RETURN_RELAY of 83. Send-to-many itself is not active on mainnet (develop MSC_SEND_TO_MANY_BLOCK = 999999). 7 separate simple sends of this input type are 1799 vB.
 - Send-to-many P2PKH N=10: DOES NOT FIT this repo's 83-byte null-data limit (script 106 bytes, data 103). Size only. Bitcoin Core 30's default -datacarriersize is 100,000, which is above this script; Omni still has to activate send-to-many. 10 separate simple sends of this input type are 2570 vB.
@@ -73,14 +73,14 @@ Send-to-many (type 7): one Class C transaction, N recipient outputs + change
 
 Mastercoin layer: amortised anchor (estimates; the layer does not exist)
 
-| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 50 sat/vB tx (split) |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| ESTIMATE tapret anchor / 10 | 154 | 15.4 | 308 (30.8) | 1540 (154) | 7700 (770) |
-| ESTIMATE 32-byte OP_RETURN anchor / 10 | 154 | 15.4 | 308 (30.8) | 1540 (154) | 7700 (770) |
-| ESTIMATE tapret anchor / 100 | 154 | 1.54 | 308 (3.08) | 1540 (15.4) | 7700 (77) |
-| ESTIMATE 32-byte OP_RETURN anchor / 100 | 154 | 1.54 | 308 (3.08) | 1540 (15.4) | 7700 (77) |
-| ESTIMATE tapret anchor / 1000 | 154 | 0.154 | 308 (0.308) | 1540 (1.54) | 7700 (7.7) |
-| ESTIMATE 32-byte OP_RETURN anchor / 1000 | 154 | 0.154 | 308 (0.308) | 1540 (1.54) | 7700 (7.7) |
+| Case | Tx vB | Per transfer vB | 2 sat/vB tx (split) | 10 sat/vB tx (split) | 20 sat/vB tx (split) | 50 sat/vB tx (split) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| ESTIMATE tapret anchor / 10 | 154 | 15.4 | 308 (30.8) | 1540 (154) | 3080 (308) | 7700 (770) |
+| ESTIMATE 32-byte OP_RETURN anchor / 10 | 154 | 15.4 | 308 (30.8) | 1540 (154) | 3080 (308) | 7700 (770) |
+| ESTIMATE tapret anchor / 100 | 154 | 1.54 | 308 (3.08) | 1540 (15.4) | 3080 (30.8) | 7700 (77) |
+| ESTIMATE 32-byte OP_RETURN anchor / 100 | 154 | 1.54 | 308 (3.08) | 1540 (15.4) | 3080 (30.8) | 7700 (77) |
+| ESTIMATE tapret anchor / 1000 | 154 | 0.154 | 308 (0.308) | 1540 (1.54) | 3080 (3.08) | 7700 (7.7) |
+| ESTIMATE 32-byte OP_RETURN anchor / 1000 | 154 | 0.154 | 308 (0.308) | 1540 (1.54) | 3080 (3.08) | 7700 (7.7) |
 
 - ESTIMATE tapret anchor / 10: Lower bound, not a measured RGB transaction. One ordinary P2TR 1-in-2-out (154 vB) is assumed to anchor 10 transfers because a tapret commitment adds no extra output. Real witnesses can be larger. Even split of 154 vB.
 - ESTIMATE 32-byte OP_RETURN anchor / 10: Estimate of the visible-commitment alternative: P2TR input, 32-byte OP_RETURN, P2TR change (154 vB), split across 10 transfers. Not a measured transaction.
@@ -105,6 +105,7 @@ premiums are not included, because none are specified.
 | ---: | ---: | ---: | ---: | ---: | ---: |
 | 2 | 344 | 344 | 61.6 | 749.6 | 37.48 |
 | 10 | 1720 | 1720 | 308 | 3748 | 187.4 |
+| 20 | 3440 | 3440 | 616 | 7496 | 374.8 |
 | 50 | 8600 | 8600 | 1540 | 18740 | 937 |
 
 Dust locked in one spendable output, in satoshis. Not a miner fee.
@@ -121,3 +122,25 @@ minRelayTxFee to that 3000 sat/kvB value before the extra factor of 3.
 | P2TR | 330 | 990 |
 
 Plain bitcoin 1-in-2-out vB, for scale: P2PKH 226, P2SH-P2WPKH 166, P2WPKH 141, P2TR 154
+
+Layer-note inputs (2 and 20 sat/vB)
+
+Shared-anchor rows divide one 154 vB tapret transaction by 100.
+That 100 is an assumption, so those per-transfer fees are estimates.
+The 154 vB and the carrier vB below are this script's serialization.
+Shielded Bitcoin (Shikhelman, Komarov, Moskvin, 24 Sep 2026), Appendix A:
+cited 610-byte envelope, cited 625-byte OP_RETURN output (script also gets 625).
+Carrier modeled here: one P2TR input, that output, one P2TR change = 736 vB.
+Paper Table 4 witness alternative: prepay 154 vB (matches tapret) + reveal 284 vB = 438 vB.
+The reveal transaction is their figure. This script does not rebuild the tapscript.
+A federated pool that does not publish each transfer has no per-transfer
+Bitcoin transaction. 0 vB is that assumption, not a measurement.
+
+| Item | vB | 2 sat/vB | 20 sat/vB | How the number was got |
+| --- | ---: | ---: | ---: | --- |
+| Tapret anchor, whole tx | 154 | 308 | 3080 | script serialization |
+| ESTIMATE tapret / 100 transfers | 1.54 | 3.08 | 30.8 | script vB, split by assumed 100 |
+| Shielded Bitcoin OP_RETURN carrier tx | 736 | 1472 | 14720 | script, using the paper's 610-byte envelope |
+| Shielded Bitcoin witness pair (cited) | 438 | 876 | 8760 | paper Table 4, 154+284; 154 matches this script |
+| ESTIMATE federated pool, in-pool transfer | 0 | 0 | 0 | assumption: no Bitcoin tx per transfer |
+| P2WPKH Omni simple-send peg | 172 | 344 | 3440 | script serialization |
