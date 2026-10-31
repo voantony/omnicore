@@ -24,6 +24,7 @@ enum MPRPCErrorCode
     MP_ERR_INPUTSELECT_FAIL =       -206,
     MP_ERR_CREATE_TX =              -211,
     MP_ERR_COMMIT_TX =              -213,
+    MP_ERR_ADDRESS_TYPE =           -214,
 
     //gettransaction_MP, listtransactions_MP
     MP_TX_NOT_FOUND =               -3331,  // No information available about transaction. (GetTransaction failed)
@@ -79,6 +80,11 @@ inline std::string error_str(int ec) {
           break;
       case MP_ERR_COMMIT_TX:
           ec_str = "Error committing transaction";
+          break;
+      case MP_ERR_ADDRESS_TYPE:
+          ec_str = "Address type is not yet supported by the Omni Layer on this network. "
+                   "Native SegWit (bc1q...) and Taproot (bc1p...) addresses cannot send or receive Omni tokens "
+                   "until they are activated. Use a legacy (1...) or P2SH (3...) address instead";
           break;
 
       case PKT_ERROR -1:

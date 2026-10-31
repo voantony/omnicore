@@ -453,6 +453,29 @@ bool IsAllowedInputType(TxoutType whichType, int nBlock)
 }
 
 /**
+ * Checks, if a destination may be used as sender or receiver of new Omni
+ * transactions created by the wallet.
+ *
+ * This is not a consensus rule. It stops the wallet from creating transactions
+ * with a sender (first input) or receiver (reference output) whose script type
+ * is not yet allowed at the given block, for example native SegWit (bech32) or
+ * Taproot (bech32m) addresses before WITNESS_V0_BLOCK and WITNESS_V1_BLOCK.
+ * Such transactions would be invalid, or the receiver output would be ignored
+ * and the tokens would not reach the receiver.
+ */
+bool IsAllowedAddressType(const CTxDestination& dest, int nBlock)
+{
+    if (!IsValidDestination(dest)) {
+        return false;
+    }
+
+    std::vector<std::vector<unsigned char>> vSolutions;
+    TxoutType whichType = Solver(GetScriptForDestination(dest), vSolutions);
+
+    return IsAllowedInputType(whichType, nBlock) && IsAllowedOutputType(whichType, nBlock);
+}
+
+/**
  * Checks, if the script type qualifies as output.
  */
 bool IsAllowedOutputType(TxoutType whichType, int nBlock)

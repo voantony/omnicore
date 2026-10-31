@@ -6,8 +6,10 @@
 #include <omnicore/mempool.h>
 #include <omnicore/omnicore.h>
 #include <omnicore/parsing.h>
+#include <omnicore/rules.h>
 #include <omnicore/script.h>
 #include <omnicore/dbtransaction.h>
+#include <omnicore/utilsbitcoin.h>
 #include <omnicore/walletutils.h>
 
 #include <consensus/amount.h>
@@ -41,7 +43,28 @@ using namespace wallet;
 #include <vector>
 
 using mastercore::AddressToPubKey;
+using mastercore::GetHeight;
+using mastercore::IsAllowedAddressType;
 using mastercore::UseEncodingClassC;
+
+/**
+ * Checks, if all non-empty addresses can be used as sender or receiver of an
+ * Omni transaction in the next block, see IsAllowedAddressType().
+ */
+static bool AreAddressTypesAllowed(const std::vector<std::string>& addresses)
+{
+    const int nNextBlock = GetHeight() + 1;
+
+    for (const std::string& address : addresses) {
+        if (address.empty()) continue;
+        if (!IsAllowedAddressType(DecodeDestination(address), nNextBlock)) {
+            PrintToLog("%s: ERROR: address type of %s is not allowed at block %d\n", __func__, address, nNextBlock);
+            return false;
+        }
+    }
+
+    return true;
+}
 
 /** Creates and sends a transaction with multiple receivers. */
 int WalletTxBuilder(
@@ -58,6 +81,11 @@ int WalletTxBuilder(
 {
 #ifdef ENABLE_WALLET
     if (!iWallet) return MP_ERR_WALLET_ACCESS;
+
+    // Refuse senders and receivers the Omni Layer would not recognize yet
+    std::vector<std::string> addressesToCheck{senderAddress};
+    addressesToCheck.insert(addressesToCheck.end(), receiverAddresses.begin(), receiverAddresses.end());
+    if (!AreAddressTypesAllowed(addressesToCheck)) return MP_ERR_ADDRESS_TYPE;
 
     // Determine the class to send the transaction via - default is Class C
     int omniTxClass = OMNI_CLASS_C;
@@ -303,6 +331,11 @@ int CreateFundedTransaction(
         return MP_ERR_WALLET_ACCESS;
     }
 
+    // Refuse senders and receivers the Omni Layer would not recognize yet
+    if (!AreAddressTypesAllowed({senderAddress, receiverAddress})) {
+        return MP_ERR_ADDRESS_TYPE;
+    }
+
     if (!UseEncodingClassC(payload.size())) {
         return MP_ENCODING_ERROR;
     }
@@ -460,6 +493,11 @@ int CreateDExTransaction(interfaces::Wallet* pwallet, const std::string& buyerAd
 {
     if (!pwallet) {
         return MP_ERR_WALLET_ACCESS;
+    }
+
+    // Refuse a buyer or seller the Omni Layer would not recognize yet
+    if (!AreAddressTypesAllowed({buyerAddress, sellerAddress})) {
+        return MP_ERR_ADDRESS_TYPE;
     }
 
     // Set the change address to the sender
