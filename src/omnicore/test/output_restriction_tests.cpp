@@ -2,6 +2,7 @@
 #include <omnicore/rules.h>
 
 #include <chainparams.h>
+#include <key_io.h>
 #include <script/standard.h>
 #include <test/util/setup_common.h>
 
@@ -120,6 +121,58 @@ BOOST_AUTO_TEST_CASE(output_nulldata_testnet)
     BOOST_CHECK(IsAllowedOutputType(TxoutType::NULL_DATA, 0));
     BOOST_CHECK(IsAllowedOutputType(TxoutType::NULL_DATA, std::numeric_limits<int>::max()));
     SelectParams(CBaseChainParams::MAIN);
+}
+
+BOOST_AUTO_TEST_CASE(address_type_legacy)
+{
+    BOOST_CHECK(IsAllowedAddressType(PKHash(), 0));
+    BOOST_CHECK(IsAllowedAddressType(PKHash(), std::numeric_limits<int>::max()));
+    BOOST_CHECK(IsAllowedAddressType(DecodeDestination("1EXoDusjGwvnjZUyKkxZ4UHEf77z6A5S4P"), 900000));
+}
+
+BOOST_AUTO_TEST_CASE(address_type_scripthash)
+{
+    int P2SH_BLOCK = ConsensusParams().SCRIPTHASH_BLOCK;
+
+    BOOST_CHECK(!IsAllowedAddressType(ScriptHash(), P2SH_BLOCK-1));
+    BOOST_CHECK(IsAllowedAddressType(ScriptHash(), P2SH_BLOCK));
+    BOOST_CHECK(IsAllowedAddressType(DecodeDestination("3MbYQMMmSkC3AgWkj9FMo5LsPTW1zBTwXL"), 900000));
+}
+
+BOOST_AUTO_TEST_CASE(address_type_witness_v0)
+{
+    int WITNESS_V0_BLOCK = ConsensusParams().WITNESS_V0_BLOCK;
+    CTxDestination bech32 = DecodeDestination("bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4");
+    BOOST_CHECK(IsValidDestination(bech32));
+
+    BOOST_CHECK(!IsAllowedAddressType(bech32, WITNESS_V0_BLOCK-1));
+    BOOST_CHECK(!IsAllowedAddressType(WitnessV0KeyHash(), WITNESS_V0_BLOCK-1));
+    BOOST_CHECK(!IsAllowedAddressType(WitnessV0ScriptHash(), WITNESS_V0_BLOCK-1));
+    BOOST_CHECK(IsAllowedAddressType(bech32, WITNESS_V0_BLOCK));
+    BOOST_CHECK(IsAllowedAddressType(WitnessV0KeyHash(), WITNESS_V0_BLOCK));
+    BOOST_CHECK(IsAllowedAddressType(WitnessV0ScriptHash(), WITNESS_V0_BLOCK));
+}
+
+BOOST_AUTO_TEST_CASE(address_type_witness_v1)
+{
+    int WITNESS_V1_BLOCK = ConsensusParams().WITNESS_V1_BLOCK;
+
+    BOOST_CHECK(!IsAllowedAddressType(WitnessV1Taproot(), WITNESS_V1_BLOCK-1));
+    BOOST_CHECK(IsAllowedAddressType(WitnessV1Taproot(), WITNESS_V1_BLOCK));
+}
+
+BOOST_AUTO_TEST_CASE(address_type_witness_testnet)
+{
+    SelectParams(CBaseChainParams::TESTNET);
+    BOOST_CHECK(IsAllowedAddressType(WitnessV0KeyHash(), 0));
+    BOOST_CHECK(IsAllowedAddressType(WitnessV1Taproot(), 0));
+    SelectParams(CBaseChainParams::MAIN);
+}
+
+BOOST_AUTO_TEST_CASE(address_type_invalid)
+{
+    BOOST_CHECK(!IsAllowedAddressType(CNoDestination(), std::numeric_limits<int>::max()));
+    BOOST_CHECK(!IsAllowedAddressType(DecodeDestination("not an address"), std::numeric_limits<int>::max()));
 }
 
 

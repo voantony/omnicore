@@ -269,6 +269,8 @@ bool IsFeatureActivated(uint16_t featureId, int transactionBlock);
 bool IsAllowedInputType(TxoutType whichType, int nBlock);
 /** Checks, if the script type qualifies as output. */
 bool IsAllowedOutputType(TxoutType whichType, int nBlock);
+/** Checks, if a destination may be used as sender or receiver of new Omni transactions (wallet policy, not consensus). */
+bool IsAllowedAddressType(const CTxDestination& dest, int nBlock);
 /** Checks, if the transaction type and version is supported and enabled. */
 bool IsTransactionTypeAllowed(int txBlock, uint32_t txProperty, uint16_t txType, uint16_t version);
 
