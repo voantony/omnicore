@@ -164,14 +164,14 @@ static UniValue omni_sendrawtx(const JSONRPCRequest& request)
 
     RPCHelpMan{"omni_sendrawtx",
        "\nBroadcasts a raw Omni Layer transaction.\n"
-       "\nredeemaddress is ignored for Class C (OP_RETURN). Class C is used when the payload\n"
-       "fits in the data carrier. The parameter selects the multisig redeem key only when the\n"
-       "transaction is encoded as Class B.\n",
+       "\nredeemaddress is validated, but has no effect for Class C (OP_RETURN). Class C is\n"
+       "the default when the payload fits in the data carrier. redeemaddress selects the\n"
+       "multisig redeem key only when the transaction is encoded as Class B.\n",
        {
            {"fromaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address to send from\n"},
            {"rawtransaction", RPCArg::Type::STR, RPCArg::Optional::NO, "the hex-encoded raw transaction"},
            {"referenceaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "a reference address (none by default)\n"},
-           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B only: address that can redeem multisig data outputs (sender by default; ignored for Class C / OP_RETURN)\n"},
+           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B redeem address (sender by default); validated, but has no effect for Class C\n"},
            {"referenceamount", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "a bitcoin amount that is sent to the receiver (minimal by default)\n"},
        },
        RPCResult{
@@ -216,15 +216,15 @@ static UniValue omni_send(const JSONRPCRequest& request)
 
     RPCHelpMan{"omni_send",
        "\nCreate and broadcast a simple send transaction.\n"
-       "\nredeemaddress is ignored for Class C (OP_RETURN). Class C is the default when the\n"
-       "payload fits in the data carrier. The parameter selects the multisig redeem key only\n"
-       "when the transaction is encoded as Class B.\n",
+       "\nredeemaddress is validated, but has no effect for Class C (OP_RETURN). Class C is\n"
+       "the default when the payload fits in the data carrier. redeemaddress selects the\n"
+       "multisig redeem key only when the transaction is encoded as Class B.\n",
        {
            {"fromaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address to send from\n"},
            {"toaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address of the receiver\n"},
            {"propertyid", RPCArg::Type::NUM, RPCArg::Optional::NO, "the identifier of the tokens to send\n"},
            {"amount", RPCArg::Type::STR, RPCArg::Optional::NO, "the amount to send\n"},
-           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B only: address that can redeem multisig data outputs (sender by default; ignored for Class C / OP_RETURN)\n"},
+           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B redeem address (sender by default); validated, but has no effect for Class C\n"},
            {"referenceamount", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "a bitcoin amount that is sent to the receiver (minimal by default)\n"},
        },
        RPCResult{
@@ -281,14 +281,14 @@ static UniValue omni_sendall(const JSONRPCRequest& request)
 
     RPCHelpMan{"omni_sendall",
        "\nTransfers all available tokens in the given ecosystem to the recipient.\n"
-       "\nredeemaddress is ignored for Class C (OP_RETURN). Class C is the default when the\n"
-       "payload fits in the data carrier. The parameter selects the multisig redeem key only\n"
-       "when the transaction is encoded as Class B.\n",
+       "\nredeemaddress is validated, but has no effect for Class C (OP_RETURN). Class C is\n"
+       "the default when the payload fits in the data carrier. redeemaddress selects the\n"
+       "multisig redeem key only when the transaction is encoded as Class B.\n",
        {
            {"fromaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address to send from\n"},
            {"toaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address of the receiver\n"},
            {"ecosystem", RPCArg::Type::NUM, RPCArg::Optional::NO, "the ecosystem of the tokens to send (1 for main ecosystem, 2 for test ecosystem)\n"},
-           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B only: address that can redeem multisig data outputs (sender by default; ignored for Class C / OP_RETURN)\n"},
+           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B redeem address (sender by default); validated, but has no effect for Class C\n"},
            {"referenceamount", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "a bitcoin amount that is sent to the receiver (minimal by default)\n"},
        },
        RPCResult{
@@ -342,16 +342,16 @@ static UniValue omni_sendnonfungible(const JSONRPCRequest& request)
 
     RPCHelpMan{"omni_sendnonfungible",
        "\nCreate and broadcast a non-fungible send transaction.\n"
-       "\nredeemaddress is ignored for Class C (OP_RETURN). Class C is the default when the\n"
-       "payload fits in the data carrier. The parameter selects the multisig redeem key only\n"
-       "when the transaction is encoded as Class B.\n",
+       "\nredeemaddress is validated, but has no effect for Class C (OP_RETURN). Class C is\n"
+       "the default when the payload fits in the data carrier. redeemaddress selects the\n"
+       "multisig redeem key only when the transaction is encoded as Class B.\n",
        {
            {"address", RPCArg::Type::STR, RPCArg::Optional::NO, "the address to send from"},
            {"toaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address of the receiver"},
            {"propertyid", RPCArg::Type::NUM, RPCArg::Optional::NO, "the identifier of the tokens to send"},
            {"tokenstart", RPCArg::Type::NUM, RPCArg::Optional::NO, "the first token in the range to send"},
            {"tokenend", RPCArg::Type::NUM, RPCArg::Optional::NO, "the last token in the range to send"},
-           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED_NAMED_ARG, "Class B only: address that can redeem multisig data outputs (sender by default; ignored for Class C / OP_RETURN)"},
+           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED_NAMED_ARG, "Class B redeem address (sender by default); validated, but has no effect for Class C"},
            {"referenceamount", RPCArg::Type::STR, RPCArg::Optional::OMITTED_NAMED_ARG, "a bitcoin amount that is sent to the receiver (minimal by default)"},
        },
        RPCResult{
@@ -1277,14 +1277,14 @@ static UniValue omni_sendsto(const JSONRPCRequest& request)
 
     RPCHelpMan{"omni_sendsto",
        "\nCreate and broadcast a send-to-owners transaction.\n"
-       "\nredeemaddress is ignored for Class C (OP_RETURN). Class C is the default when the\n"
-       "payload fits in the data carrier. The parameter selects the multisig redeem key only\n"
-       "when the transaction is encoded as Class B.\n",
+       "\nredeemaddress is validated, but has no effect for Class C (OP_RETURN). Class C is\n"
+       "the default when the payload fits in the data carrier. redeemaddress selects the\n"
+       "multisig redeem key only when the transaction is encoded as Class B.\n",
        {
            {"fromaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address to send from\n"},
            {"propertyid", RPCArg::Type::NUM, RPCArg::Optional::NO, "the identifier of the tokens to distribute\n"},
            {"amount", RPCArg::Type::STR, RPCArg::Optional::NO, "the amount to distribute\n"},
-           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B only: address that can redeem multisig data outputs (sender by default; ignored for Class C / OP_RETURN)\n"},
+           {"redeemaddress", RPCArg::Type::STR, RPCArg::Optional::OMITTED, "Class B redeem address (sender by default); validated, but has no effect for Class C\n"},
            {"distributionproperty", RPCArg::Type::NUM, RPCArg::Optional::OMITTED, "the identifier of the property holders to distribute to\n"},
        },
        RPCResult{
