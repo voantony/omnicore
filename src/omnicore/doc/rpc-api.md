@@ -193,6 +193,8 @@ $ omnicore-cli "omni_sendall" "3M9qvHKtgARhqcMtM5cRT9VaiDJ5PSfQGY" "37FaKponF7zq
 
 Create and broadcast a send-to-many transaction, which allows to transfer tokens from one source to multiple receivers.
 
+The payload is sent as Class C (OP_RETURN) output. Each receiver adds 9 bytes, so with the default `-datacarriersize` of 83 bytes up to 7 receivers fit into one transaction. If there are more receivers, the call fails with an error that says how many fit. Split them into several transactions, or raise `-datacarriersize`, if the network relays and mines larger OP_RETURN outputs.
+
 **Arguments:**
 
 | Name                | Type    | Presence | Description                                                                                  |

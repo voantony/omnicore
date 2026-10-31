@@ -479,7 +479,8 @@ static UniValue omni_sendtomany(const JSONRPCRequest& request)
     auto [wallet, pwallet] = GetWalletFromContextForJSONRPCRequest(request);
 
     RPCHelpMan{"omni_sendtomany",
-       "\nCreate and broadcast a send-to-many transaction, which allows to transfer tokens from one source to multiple receivers.\n",
+       "\nCreate and broadcast a send-to-many transaction, which allows to transfer tokens from one source to multiple receivers.\n"
+       "The payload is sent as Class C (OP_RETURN) output. With the default -datacarriersize of 83 bytes, up to 7 receivers fit into one transaction.\n",
        {
            {"fromaddress", RPCArg::Type::STR, RPCArg::Optional::NO, "the address to send from"},
            {"propertyid", RPCArg::Type::NUM, RPCArg::Optional::NO, "the identifier of the tokens to send"},
@@ -539,6 +540,34 @@ static UniValue omni_sendtomany(const JSONRPCRequest& request)
     std::vector<unsigned char> testPayload = CreatePayload_SendToMany(
         propertyId,
         outputValues);
+
+    // Send-to-many is only created as Class C (OP_RETURN) transaction. Each receiver adds
+    // 9 bytes to the payload, so with the default -datacarriersize of 83 bytes there is
+    // room for at most 7 receivers. Larger payloads would silently fall back to Class B
+    // (bare multisig), which costs considerably more and leaves bitcoin in multisig outputs.
+    // Fail with a clear message instead. This is wallet policy only: the Omni Layer parser
+    // accepts larger Class C payloads, so -datacarriersize may be raised, if the network
+    // relays and mines larger OP_RETURN outputs.
+    if (!UseEncodingClassC(testPayload.size() + 1 /* OP_RETURN */ + 2 /* pushdata opcodes */)) {
+        const size_t nReceivers = outputValues.size();
+        const size_t nPerReceiver = 1 /* output index */ + 8 /* amount */;
+        const size_t nHeader = testPayload.size() - nReceivers * nPerReceiver;
+        size_t nMaxReceivers = 0;
+        while (nMaxReceivers < nReceivers &&
+               UseEncodingClassC(nHeader + (nMaxReceivers + 1) * nPerReceiver + 1 + 2)) {
+            ++nMaxReceivers;
+        }
+        if (nMaxReceivers == 0) {
+            throw JSONRPCError(RPC_INVALID_PARAMETER,
+                "Send-to-many requires Class C (OP_RETURN) encoding, which is not available "
+                "(check -datacarrier and -datacarriersize)");
+        }
+        throw JSONRPCError(RPC_INVALID_PARAMETER, strprintf(
+            "Too many receivers for one send-to-many transaction: %d receivers do not fit into "
+            "an OP_RETURN output with -datacarriersize=%d. Send at most %d receivers per "
+            "transaction, or raise -datacarriersize, if the network relays larger OP_RETURN outputs",
+            nReceivers, nMaxDatacarrierBytes, nMaxReceivers));
+    }
 
     int payloadOutputCount = GetDryPayloadOutputCount(fromAddress, "", testPayload, pwallet.get());
 
