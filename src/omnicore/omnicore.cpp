@@ -1594,6 +1594,11 @@ int mastercore_init(node::NodeContext& node)
 
     fOmniSafeAddresses = gArgs.GetBoolArg("-omnisafeaddresses", MainNet());
 
+    // Class C payloads must fit into -datacarriersize. Since Bitcoin Core 24,
+    // the relay limit lives in the mempool options, so set the global value
+    // used by the Omni Layer here.
+    nMaxDatacarrierBytes = gArgs.GetIntArg("-datacarriersize", MAX_OP_RETURN_RELAY);
+
     RegisterSharedValidationInterface(omniValidationInterface);
 
     PrintToConsole("Omni Core initialization completed\n");

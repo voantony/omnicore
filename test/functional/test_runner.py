@@ -354,6 +354,7 @@ BASE_SCRIPTS = [
     'omni_stov1.py',
     'omni_deactivation.py',
     'omni_freeze.py',
+    'omni_sendtomany_limit.py',
     'omni_freedexspec.py',
     'omni_dexversionsspec.py',
     'omni_feecache.py',
