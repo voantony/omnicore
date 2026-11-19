@@ -727,7 +727,10 @@ class OmniNonFungibleTokensTest(BitcoinTestFramework):
         self.nodes[0].invalidateblock(blockhash)
         self.nodes[0].clearmempool()
         self.nodes[0].generate(15, invalid_call=False)
-        self.sync_all()
+        # Only the chain matters below. node1 keeps the transactions from the
+        # disconnected blocks in its mempool, and relaying them to node0 can
+        # take longer than the 60 s mempool sync timeout.
+        self.sync_blocks()
 
         result = self.nodes[1].omni_getnonfungibletokendata(property_id, 102)
         assert_equal(result[0]['holderdata'], 'New holderdata')
