@@ -1,0 +1,82 @@
+# Linux build and test for Omni Core.
+#
+# Runs on pushes to ci/** branches only, so it never runs on other branches.
+# workflow_dispatch can build any other ref (for example a PR branch) without
+# changing that branch: pass it as the "ref" input.
+name: Linux CI
+run-name: "Linux CI: ${{ inputs.ref || github.ref_name }}"
+
+on:
+  push:
+    branches:
+      - 'ci/**'
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: 'Branch, tag or commit to build (default: the branch the workflow runs from)'
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 1G
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
+
+      - name: Show the commit under test
+        run: git log -1 --format='%H %s'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential libtool autotools-dev automake pkg-config \
+            bsdmainutils python3 libevent-dev libboost-dev libsqlite3-dev libdb5.3++-dev ccache
+
+      # develop 9352212 does not compile with GCC 13 or newer without this include
+      # (OmniLayer/omnicore#1325). Add it only when the tree does not have it yet.
+      - name: Add <cstdint> to omnicore/parsing.h if missing
+        run: |
+          if grep -q '#include <cstdint>' src/omnicore/parsing.h; then
+            echo "parsing.h already includes <cstdint>"
+          else
+            sed -i 's|^#include <string>|#include <cstdint>\n#include <string>|' src/omnicore/parsing.h
+            echo "Added #include <cstdint> to parsing.h for this build"
+            git diff src/omnicore/parsing.h
+          fi
+
+      - name: Restore ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: ccache-${{ runner.os }}-
+
+      - name: Configure
+        run: |
+          ./autogen.sh
+          ./configure --without-gui --disable-bench --with-incompatible-bdb \
+            CC="ccache gcc" CXX="ccache g++"
+
+      - name: Build
+        run: make -j"$(nproc)"
+
+      - name: make check
+        run: make -j"$(nproc)" check
+
+      - name: Omni functional tests
+        run: |
+          python3 test/functional/test_runner.py -j"$(nproc)" --combinedlogslen=200 \
+            omni_calculate_fee.py omni_reorg.py omni_clientexpiry.py omni_metadexprices.py \
+            omni_metadexphase3.py omni_stov1.py omni_deactivation.py omni_freeze.py \
+            omni_freedexspec.py omni_dexversionsspec.py omni_feecache.py omni_delegation.py \
+            omni_nonfungibletokens.py omni_safeaddress.py
