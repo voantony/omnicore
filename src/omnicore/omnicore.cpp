@@ -1451,7 +1451,9 @@ static bool CheckOmniDatabaseOpened(const CDBBase* db, const fs::path& path)
 
     const std::string status = db ? db->GetOpenStatus().ToString() : "not created";
     std::string hint;
-    if (status.find("lock") != std::string::npos || status.find("LOCK") != std::string::npos) {
+    // LevelDB reports lock contention as "IO error: lock <path>/LOCK: ...". Other errors on the
+    // LOCK file, such as "IO error: <path>/LOCK: Permission denied", are not lock contention.
+    if (status.find("IO error: lock ") != std::string::npos) {
         hint = " The database is locked by another process, for example another Omni Core instance using the "
                "same files. Stop that process and try again.";
     }
